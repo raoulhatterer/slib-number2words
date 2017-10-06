@@ -1,0 +1,217 @@
+\title{Écrire un nombre en anglais}
+
+\author{Raoul HATTERER}
+
+\email{ hatterer.med@laposte.net}
+
+
+<<!-- algorithm: http://www.blackwasp.co.uk/NumberToWords.aspx -->
+
+\matrix{smallNumbers = one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen, seventeen, eighteen, nineteen}
+\matrix{tyWords = , twenty, thirty, forty, fifty, sixty, seventy, eighty, ninety}
+\matrix{scaleNumbers = ,thousand, million, billion}
+
+\text{number = randint(-99999999..99999999)} <!-- attention: pas plus de 8 digits -->
+
+\text{afficheFr=slib(numeration/ecriturenombre \number)}
+\text{affiche=slib(oef/blank ,\(,),\afficheFr)}
+
+
+\integer{positive = abs(\number)}
+
+
+
+<!-- Three Digit Rule. 
+The integer value is split into groups of three digits starting from the right-hand side. 
+Each set of three digits is then processed individually as a number of hundreds, tens and units. 
+Once converted to text, the three-digit groups are recombined with the addition
+ of the relevant scale number (thousand, million, billion).-->
+ 
+\matrix{digitGroups = }
+\matrix{tGroups = }
+
+\for{ i = 1 to 4 } { 
+    \integer{threeDigits = \positive%1000}
+    \matrix{digitGroups =  \i=1? \threeDigits : \digitGroups, \threeDigits}
+    \integer{positive = floor(\positive /1000)} 
+}
+
+
+
+\for{ i = 1 to 4}
+{
+
+
+\integer{threeDigits = \digitGroups[\i]}
+
+\text{groupText = }
+
+\integer{hundreds = floor(\threeDigits/100)}
+\integer{tensUnits = \threeDigits%100}
+
+<!-- Hundreds Rules. 
+If the hundreds portion of a three-digit group is not zero, 
+the number of hundreds is added as a word. 
+If the three-digit group is exactly divisible by one hundred, 
+the text 'hundred' is appended. If not, the text "hundred and" is appended. 
+eg. 'two hundred' or 'one hundred and twelve'-->
+
+\if{\hundreds != 0}
+{
+    \text{groupText = \groupText \smallNumbers[\hundreds]  hundred}
+ 
+    \if{tensUnits != 0}
+    {
+        \text{groupText = \groupText and}
+    }
+}
+
+\integer{tens = floor(\tensUnits /10)}
+\integer{units = \tensUnits%10}
+
+<!-- Tens Rules. 
+If the tens section of a three-digit group is two or higher, 
+the appropriate '-ty' word (twenty, thirty, etc.) is added to the text 
+and followed by the name of the third digit 
+(unless the third digit is a zero, which is ignored). 
+If the tens and the units are both zero, no text is added. 
+For any other value, the name of the one or two-digit number is added as a special case.-->
+ 
+\if {\tens >= 2}
+{
+    \text{groupText = \groupText \tyWords[\tens]}
+    \if {\units != 0}
+    {
+        \text{groupText = \groupText-\smallNumbers[\units]}
+    }
+}
+{
+\if {\tensUnits != 0}
+    {\text{groupText = \groupText \smallNumbers[\tensUnits]}}
+}
+
+
+    \matrix{tGroups = \i=1? \groupText :\tGroups , \groupText }
+
+
+}
+
+<!-- Recombination Rules. 
+When recombining the translated three-digit groups, each group except the last is followed 
+by a large number name and a comma, 
+unless the group is blank and therefore not included at all. 
+One exception is when the final group does not include any hundreds and 
+there is more than one non-blank group. 
+In this case, the final comma is replaced with 'and'. 
+eg. 'one billion, one million and twelve'.
+-->
+
+\text{combined = \tGroups[1]}
+
+\for{i = 2 to 4}
+{
+\if{\digitGroups[\i]!=0}
+{
+\text{prefix =   \tGroups[\i] \scaleNumbers[\i]}
+\if{\digitGroups[1]!=0}{
+\text{prefix = \digitGroups[1] < 100? \prefix and: \prefix,}
+}
+\text{combined =  \prefix \combined}
+}
+
+
+}
+
+
+<!-- Negative Rule. 
+Negative numbers are always preceded by the text 'negative'. -->
+
+
+\if{\number < 0}{\text {combined = negative \combined}}
+
+<!-- Zero Rule. If the value is zero then the number in words is 'zero' and no other rules apply. -->
+\text {result = \number = 0 ? zero:\combined}
+
+
+
+
+
+\statement{
+
+
+Écrire \affiche en toutes lettres en anglais : <br>
+\embed{r1 ,90}<br>
+
+
+
+
+
+Conseil : Vous pouvez cliquer sur « Indication » pour avoir des explications concernant les règles à suivre.
+}
+
+
+
+\answer{...}{ \result}{type=nocase}
+
+
+
+
+
+\hint{
+<h1>Règles d'écriture des nombres en anglais : </h1>
+<ol>
+<li> Les nombres intermédiaires sont faciles à former, en ajoutant l'unité à la dizaine. Ne pas oublier le trait d'union !
+Exemples : 
+21 = twenty-one / 47 = forty-seven 
+/ 86 = eighty-six</li>
+
+<li> En anglais, on utilise une virgule pour séparer les centaines des milliers et non une espace.
+Exemple :
+en français : 1 000 ;
+en anglais : 1,000.
+
+Le point est l'équivalent de notre virgule française.
+
+Exemple : 
+en français : 2,54 ;
+en anglais : 2.54.
+</li>
+
+<li> Les adjectifs numéraux sont invariables et ne prennent donc pas de "-s" quand ils sont précédés d'un nombre ou de "several" (plusieurs) :
+two thousand years = 2 000 ans. 
+
+several thousand years = plusieurs milliers d'années.
+
+Pas de "-s" à "thousand".
+
+
+
+Par contre, quand ils sont employés comme noms et lorsqu'ils sont suivis de "of", HUNDRED, THOUSAND, MILLION et BILLION prennent un "-s" :
+
+Thousands of people watched our TV show yesterday.
+
+Des milliers de personnes ont regardé notre émission télévisée hier.
+
+</li>
+
+<li> Les dizaines et les unités qu'on ajoute à HUNDRED et THOUSAND sont précédées de AND, sauf en anglais américain où il est souvent omis :
+
+Exemples :
+
+450 = four hundred and fifty (anglais britannique)
+(On ajoute 50 à 400)
+
+5,001 = five thousand and one. (anglais britannique)
+
+(On ajoute 1 à 5000)
+</li>
+</ol>
+<p>
+Un exemple  de grand nombre :
+
+
+
+227,835 = two hundred AND twenty-seven thousand eight hundred AND thirty-five
+</p>
+C'est facile, il suffit de ne pas paniquer et d'y aller doucement.
+}
